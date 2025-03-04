@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+vendor/
+.env
+
+# Compiled output
+dist/
+build/
+out/
+*.class
+*.pyc
+__pycache__/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+
+# Testing and coverage
+coverage/
+.coverage
+.pytest_cache/
+
+# Build tools
+.gradle/
+.maven/
+target/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
