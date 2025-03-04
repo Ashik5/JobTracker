@@ -74,7 +74,7 @@ export function Sidebar() {
   return (
     <div
       className={`fixed top-0 left-0 z-40 flex h-screen flex-col border-r bg-background px-4 py-4 transition-all ${
-        isCollapsed ? "w-16" : "w-64"
+    isCollapsed ? "w-20 min-w-16" : "w-64"
       }`}
     >
       {/* Logo */}
