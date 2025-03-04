@@ -3,13 +3,8 @@ module.exports = (sequelize, DataTypes) => {
         sequelize.define('Users', {
             id: {
                 type: DataTypes.INTEGER,
-                autoIncrement: true
-            },
-            auth0_id: {
-                type: DataTypes.STRING,
-                allowNull: false,
-                unique: true,
-                primaryKey: true,
+                autoIncrement: true,
+                primaryKey: true
             },
             email: {
                 type: DataTypes.STRING,
@@ -18,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
                 validate: {
                     isEmail: true
                 }
+            },
+            password: {
+                type: DataTypes.STRING,
+                allowNull: false
             },
             role: {
                 type: DataTypes.ENUM('user', 'company', 'admin'),

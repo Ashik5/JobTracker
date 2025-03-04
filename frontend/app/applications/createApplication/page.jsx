@@ -13,39 +13,38 @@ export default function CreateJobPost() {
   const [skillInput, setSkillInput] = useState("");
   const [benefitInput, setBenefitInput] = useState("");
 
-  const [userData, setUserData] = useState(null);
-
-    // Form state
-    const [formData, setFormData] = useState({
-      title: "",
-      description: "",
-      requirements: "",
-      salary_range_start: "",
-      salary_range_end: "",
-      job_type: "full-time",
-      location: "",
-      is_remote: false,
-      experience_level: "mid",
-      skills_required: [],
-      benefits: [],
-      application_deadline: "",
-      status: "draft",
-      created_by: '',
-    });
+  // Form state
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    requirements: "",
+    salary_range_start: "",
+    salary_range_end: "",
+    job_type: "full-time",
+    location: "",
+    is_remote: false,
+    experience_level: "mid",
+    skills_required: [],
+    benefits: [],
+    application_deadline: "",
+    status: "draft",
+    created_by: "",
+  });
 
   useEffect(() => {
-    const tempData = localStorage.getItem("tempUserData");
-    if (tempData) {
-      const parsedData = JSON.parse(tempData);
-      setUserData(parsedData);
-      setFormData(prevFormData => ({
+    const storedUser = localStorage.getItem("user");
+
+    if (storedUser) {
+      const manualUserId = JSON.parse(storedUser); // Parse the JSON string into an object
+      console.log(manualUserId); // Check the full object in the console
+
+      setFormData((prevFormData) => ({
         ...prevFormData,
-        created_by: parsedData.auth0Id,
+        created_by: manualUserId.id, // Access the correct `id` property
       }));
     }
   }, []);
   console.log(formData);
-
 
   // Handle text input changes
   const handleChange = (e) => {

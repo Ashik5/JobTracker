@@ -1,82 +1,113 @@
 'use client'
-import React from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import { FaGoogle, FaGithub, FaEnvelope } from 'react-icons/fa';
+import React, { useState, useContext } from "react";
+import { useRouter } from "next/navigation";
+import { AuthContext } from "@/context/AuthContext"; // Import Auth Context
+import { FaEnvelope, FaLock } from 'react-icons/fa';
 
 const CustomLoginPage = () => {
-  const { loginWithRedirect } = useAuth0();
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null); // Handle login errors
 
-  const loginWithGoogle = () => {
-    loginWithRedirect({
-      connection: 'google-oauth2'
-    });
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null); // Reset error state
 
-  const loginWithGithub = () => {
-    loginWithRedirect({
-      connection: 'github'
-    });
-  };
+    try {
+      const response = await fetch("http://localhost:3001/users/login", { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-  const loginWithEmail = () => {
-    loginWithRedirect({
-      screen_hint: 'login'
-    });
+      const data = await response.json();
+
+      if (response.ok) {
+        // Save user data to localStorage
+        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("token", data.token);
+        router.push("/dashboard"); // Redirect after successful login
+      } else {
+        setError(data.error || "Login failed. Please try again.");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Something went wrong. Please try again.");
+    }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-white px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-black">
             Sign in to your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <button
-              onClick={() => loginWithRedirect({ screen_hint: 'signup' })}
-              className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              create a new account
-            </button>
-          </p>
         </div>
-        <div className="mt-8 space-y-4">
+
+        {error && (
+          <p className="text-red-600 text-sm text-center">{error}</p>
+        )}
+
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="email" className="sr-only">Email address</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                  <FaEnvelope className="h-5 w-5 text-gray-400" />
+                </span>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="block w-full rounded-md border border-gray-300 pl-10 py-2 text-black focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+                  placeholder="Email address"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="sr-only">Password</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                  <FaLock className="h-5 w-5 text-gray-400" />
+                </span>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="block w-full rounded-md border border-gray-300 pl-10 py-2 text-black focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+                  placeholder="Password"
+                />
+              </div>
+            </div>
+          </div>
+
           <button
-            onClick={loginWithGoogle}
-            className="group relative flex w-full justify-center rounded-md border border-transparent bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            type="submit"
+            className="group relative flex w-full justify-center rounded-md border border-transparent bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
           >
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-              <FaGoogle className="h-5 w-5 text-gray-400 group-hover:text-indigo-500" />
-            </span>
-            Continue with Google
+            Sign in
           </button>
-          
-          <button
-            onClick={loginWithGithub}
-            className="group relative flex w-full justify-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          >
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-              <FaGithub className="h-5 w-5 text-gray-300 group-hover:text-white" />
-            </span>
-            Continue with GitHub
-          </button>
-          
-          <button
-            onClick={loginWithEmail}
-            className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          >
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-              <FaEnvelope className="h-5 w-5 text-indigo-400 group-hover:text-indigo-300" />
-            </span>
-            Sign in with Email
-          </button>
-        </div>
-        
-        <div className="flex items-center justify-center mt-6">
+        </form>
+
+        <div className="flex items-center justify-between mt-6">
           <div className="text-sm">
-            <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Need help signing in?
+            <a href="#" className="font-medium text-gray-600 hover:text-black">
+              Forgot your password?
+            </a>
+          </div>
+          <div className="text-sm">
+            <a href="/signup" className="font-medium text-gray-600 hover:text-black">
+              Create account
             </a>
           </div>
         </div>

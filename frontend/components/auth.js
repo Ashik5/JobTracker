@@ -1,80 +1,55 @@
-import React, { useEffect } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import { useRouter } from 'next/navigation';
+"use client";
+
+import React, { useContext } from "react";
+import { useRouter } from "next/navigation";
+import { AuthContext } from "@/context/AuthContext"; // Ensure you have an AuthContext
+import Image from "next/image";
 
 const AuthComponent = () => {
-  const { loginWithRedirect, logout, isAuthenticated, user, isLoading } = useAuth0();
   const router = useRouter();
+  const { user, logout } = useContext(AuthContext); // Getting user & logout function
 
-  useEffect(() => {
-    const checkUser = async () => {
-      if (isAuthenticated && user) {
-        try {
-          const response = await fetch('http://localhost:3001/users/check-user', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: user.email,
-              auth0Id: user.sub,
-              name: user.name,
-              picture: user.picture
-            }),
-          });
+  console.log("AuthComponent - User:", user);
 
-          const data = await response.json();
 
-          if (data.isNewUser) {
-            // Store temp user data in localStorage or state management
-            localStorage.setItem('tempUserData', JSON.stringify(data.tempUserData));
-            // Redirect to signup page
-            router.push('/signup');
-          }
-        } catch (error) {
-          console.error('Error checking user:', error);
-        }
-      }
-    };
-
-    // Only run checkUser if we're authenticated and have user data
-    if (isAuthenticated && user) {
-      checkUser();
-    }
-  }, [isAuthenticated, user, router.isReady]); // Add router.isReady to dependencies
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (isAuthenticated && user) {
+  if (!user) {
     return (
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <img 
-            src={user.picture} 
-            alt={user.name || "User avatar"} 
-            className="w-8 h-8 rounded-full" 
-          />
-          <span className="text-sm font-medium">{user.name}</span>
-        </div>
-        <button 
-          onClick={() => logout({ returnTo: window.location.origin })}
-          className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+      <div className="flex gap-2">
+        <button
+          onClick={() => router.push("/login")}
+          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
         >
-          Log Out
+          Log In
+        </button>
+        <button
+          onClick={() => router.push("/signup")}
+          className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+        >
+          Sign Up
         </button>
       </div>
     );
   }
 
   return (
-    <button 
-      onClick={() => loginWithRedirect()}
-      className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-    >
-      Log In
-    </button>
+    <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
+        <Image
+          src={user.picture || "/default-avatar.png"}
+          alt={user.name || "User avatar"}
+          width={32}
+          height={32}
+          className="w-8 h-8 rounded-full"
+        />
+        <span className="text-sm font-medium">{user.name}</span>
+      </div>
+      <button
+        onClick={logout}
+        className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+      >
+        Log Out
+      </button>
+    </div>
   );
 };
 
