@@ -12,64 +12,35 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import AuthComponent from "@/components/auth";
-import { useAuth0 } from "@auth0/auth0-react";
+import { AuthContext } from "@/context/AuthContext";
 
 export function Sidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
-  const [userRole, setUserRole] = useState(null);
+  const { user } = useContext(AuthContext);
   const [navigation, setNavigation] = useState([
     { name: "Dashboard", href: "/", icon: Home },
     { name: "Browse Jobs", href: "/browse", icon: Building2 },
     { name: "My Applications", href: "/applications", icon: Briefcase },
   ]);
 
-  // Fetch user data from your backend after authentication
+  // Update navigation based on user role
   useEffect(() => {
-    async function fetchUserData() {
-      if (isAuthenticated && user?.sub) {
-        try {
-          const response = await fetch(
-            `http://localhost:3001/users/${encodeURIComponent(user.sub)}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          );
-          const userData = await response.json();
-          const role = userData.user.role;
+    if (user && user.role) {
+      const baseNavigation = [{ name: "Browse Jobs", href: "/browse", icon: Building2 }];
 
-          // Update navigation based on role
-          const baseNavigation = [
-            { name: "Browse Jobs", href: "/browse", icon: Building2 },
-          ];
-
-          // Create a new array with admin link for company users
-          if (role === "company") {
-            setNavigation([
-              ...baseNavigation,
-              {
-                name: "Create a job post",
-                href: "/applications/createApplication",
-                icon: SquarePlus,
-              },
-            ]);
-          } else {
-            setNavigation(baseNavigation);
-          }
-        } catch (error) {
-          console.error("Failed to fetch user data:", error);
-        }
+      if (user.role === "company") {
+        setNavigation([
+          ...baseNavigation,
+          { name: "Create a job post", href: "/applications/createApplication", icon: SquarePlus },
+        ]);
+      } else {
+        setNavigation(baseNavigation);
       }
     }
-
-    fetchUserData();
-  }, [isAuthenticated, user, getAccessTokenSilently]);
+  }, [user]);
 
   return (
     <div
@@ -91,11 +62,7 @@ export function Sidebar() {
           className="ml-auto"
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
-          {isCollapsed ? (
-            <Menu className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
+          {isCollapsed ? <Menu className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
       </div>
 
@@ -121,7 +88,13 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="space-y-4 border-t pt-4">
-        <AuthComponent />
+        {!isCollapsed ? (
+          <AuthComponent />
+        ) : (
+          <Button variant="ghost" size="icon" className="w-full">
+            <LayoutDashboard className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   );

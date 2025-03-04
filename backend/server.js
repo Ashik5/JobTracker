@@ -1,11 +1,10 @@
 const express = require('express');
 const cors = require('cors');
-const { auth } = require('express-oauth2-jwt-bearer');
 require('dotenv').config();
 const db = require('./models');
 const jobRoutes = require('./routes/JobPost');
 const userRoutes = require('./routes/User');
-
+const bodyParser = require('body-parser');
 
 
 
@@ -14,28 +13,8 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.json());
 
-// Auth0 JWT middleware configuration
-const jwtCheck = auth({
-  audience: process.env.AUTH0_AUDIENCE,
-  issuerBaseURL: process.env.AUTH0_ISSUER,
-  tokenSigningAlg: 'RS256'
-});
-
-// Protected API route example
-app.get('/api/protected', jwtCheck, (req, res) => {
-  res.json({
-    message: 'This is a protected endpoint',
-    user: req.auth
-  });
-});
-
-// Public API route example
-app.get('/api/public', (req, res) => {
-  res.json({
-    message: 'This is a public endpoint'
-  });
-});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
